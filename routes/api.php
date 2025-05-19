@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\FoodController;
 use App\Http\Controllers\ReadingLogsControllr;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -12,5 +13,9 @@ Route::post('/reading-logs', [ReadingLogsControllr::class, 'store']);
 Route::get('/reading-logs', [ReadingLogsControllr::class, 'readingsByDate']);
 
 Route::get('/reading-logs/statistics', [ReadingLogsControllr::class, 'statistics']);
+
+
+//
+Route::get('/foods-by-category', [FoodController::class, 'foodsByBategory']);
 
 
