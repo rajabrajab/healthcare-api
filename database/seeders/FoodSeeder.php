@@ -17,21 +17,32 @@ class FoodSeeder extends Seeder
                 'measurement_unit' => 'g',
                 'gdf15_effect' => 'increase',
                 'gdf15_points' => 10,
-                'foods' => ['Apple', 'Banana', 'Orange'],
+                'foods' => [
+                    'Apple' => 'A sweet and crisp fruit, perfect for snacks or desserts.',
+                    'Banana' => 'A soft and energy-rich fruit, great for smoothies.',
+                    'Orange' => 'A juicy citrus fruit, high in vitamin C.',
+                ],
             ],
             [
                 'name' => 'Vegetables',
                 'measurement_unit' => 'g',
                 'gdf15_effect' => 'none',
                 'gdf15_points' => 0,
-                'foods' => ['Carrot', 'Broccoli'],
+                'foods' => [
+                    'Apple' => 'A sweet and crisp fruit, perfect for snacks or desserts.',
+                    'Banana' => 'A soft and energy-rich fruit, great for smoothies.',
+                    'Orange' => 'A juicy citrus fruit, high in vitamin C.',
+                ],
             ],
             [
                 'name' => 'Dairy',
                 'measurement_unit' => 'ml',
                 'gdf15_effect' => 'decrease',
                 'gdf15_points' => -5,
-                'foods' => ['Milk', 'Cheese'],
+                'foods' => [
+                    'Milk' => 'A nutritious liquid dairy product rich in calcium.',
+                    'Cheese' => 'A solid dairy product made from milk, rich in protein and fat.',
+                ],
             ],
         ];
 
@@ -43,9 +54,10 @@ class FoodSeeder extends Seeder
                 'gdf15_points' => $data['gdf15_points'],
             ]);
 
-            foreach ($data['foods'] as $foodName) {
+            foreach ($data['foods'] as $foodName => $description) {
                 Food::create([
                     'name' => $foodName,
+                    'description' => $description,
                     'category_id' => $category->id,
                 ]);
             }

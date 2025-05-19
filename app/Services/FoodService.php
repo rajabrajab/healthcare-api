@@ -17,6 +17,7 @@ class FoodService
                 return [
                     'id' => $food->id,
                     'name' => $food->name,
+                    'description' => $food->description,
                 ];
             })->toArray();
         }
