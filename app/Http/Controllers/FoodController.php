@@ -21,4 +21,22 @@ class FoodController extends Controller
 
         return response()->data($data,ResponseMessages::INDEX_SUCCESS);
     }
+
+    public function userDiet()
+    {
+        $data = $this->foodService->getUserDiet();
+        return response()->data($data, ResponseMessages::INDEX_SUCCESS);
+    }
+
+    public function addFoodToDiet(Request $request)
+    {
+        $validated = $request->validate([
+            'food_ids' => 'required|array',
+            'food_ids.*' => 'exists:foods,id',
+        ]);
+
+        $this->foodService->addFoodToUserDiet($validated['food_ids']);
+
+        return response()->data('User Diet updated successfully.');
+    }
 }

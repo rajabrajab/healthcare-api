@@ -16,6 +16,9 @@ Route::get('/reading-logs/statistics', [ReadingLogsControllr::class, 'statistics
 
 
 //
-Route::get('/foods-by-category', [FoodController::class, 'foodsByBategory']);
-
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/foods-by-category', [FoodController::class, 'foodsByBategory']);
+    Route::post('/add-diet', [FoodController::class, 'addFoodToDiet']);
+    Route::get('/diets', [FoodController::class, 'userDiet']);
+});
 

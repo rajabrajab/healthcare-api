@@ -29,4 +29,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function userDiet()
+    {
+        return $this->belongsToMany(Food::class, 'user_diets');
+    }
 }

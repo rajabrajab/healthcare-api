@@ -2,26 +2,46 @@
 
 namespace App\Services;
 
+use App\Http\Resources\CategoryWithFoods;
+use App\Http\Resources\FavoriteFoodCategoryResource;
 use App\Models\FoodCategory;
+use Illuminate\Support\Facades\Auth;
 
 class FoodService
 {
-    public function getFoodsGroupedByCategory(): array
+    protected $user;
+
+    public function __construct()
+    {
+        $this->user = Auth::user();
+    }
+
+    public function getFoodsGroupedByCategory()
     {
         $categories = FoodCategory::with('foods')->get();
 
-        $result = [];
+        return CategoryWithFoods::collection($categories);
+    }
 
-        foreach ($categories as $category) {
-            $result[$category->name] = $category->foods->map(function ($food) {
-                return [
-                    'id' => $food->id,
-                    'name' => $food->name,
-                    'description' => $food->description,
-                ];
-            })->toArray();
-        }
+    public function getUserDiet()
+    {
+        $favorites = $this->user->userDiet()->with('category')->get();
 
-        return $result;
+        $grouped = $favorites->groupBy(function ($food) {
+            return $food->category->id;
+        })->map(function ($foods) {
+            return [
+                'category' => $foods->first()->category,
+                'foods' => $foods,
+            ];
+        })->values();
+
+        return FavoriteFoodCategoryResource::collection($grouped);
+    }
+
+
+    public function addFoodToUserDiet(array $foodIds)
+    {
+        return $this->user->userDiet()->syncWithoutDetaching($foodIds);
     }
 }
