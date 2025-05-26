@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Food;
 use App\Models\FoodCategory;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class FoodSeeder extends Seeder
@@ -13,36 +12,116 @@ class FoodSeeder extends Seeder
     {
         $categories = [
             [
-                'name' => 'Fruits',
-                'measurement_unit' => 'g',
-                'gdf15_effect' => 'increase',
-                'gdf15_points' => 10,
-                'foods' => [
-                    'Apple' => 'A sweet and crisp fruit, perfect for snacks or desserts.',
-                    'Banana' => 'A soft and energy-rich fruit, great for smoothies.',
-                    'Orange' => 'A juicy citrus fruit, high in vitamin C.',
-                ],
-            ],
-            [
                 'name' => 'Vegetables',
                 'measurement_unit' => 'g',
-                'gdf15_effect' => 'none',
+                'gdf15_effect' => 'Anti-inflammatory',
                 'gdf15_points' => 0,
-                'foods' => [
-                    'Apple' => 'A sweet and crisp fruit, perfect for snacks or desserts.',
-                    'Banana' => 'A soft and energy-rich fruit, great for smoothies.',
-                    'Orange' => 'A juicy citrus fruit, high in vitamin C.',
-                ],
+                'foods' => ['Spinach', 'Kale', 'Broccoli', 'Carrots'],
+            ],
+            [
+                'name' => 'Fruits',
+                'measurement_unit' => 'g',
+                'gdf15_effect' => 'Anti-inflammatory',
+                'gdf15_points' => 0,
+                'foods' => ['Berries', 'Apples', 'Oranges', 'Pomegranates'],
+            ],
+            [
+                'name' => 'Fats',
+                'measurement_unit' => 'g',
+                'gdf15_effect' => 'Anti-inflammatory',
+                'gdf15_points' => 0,
+                'foods' => ['Olive oil', 'Avocados', 'Omega-3 oils'],
+            ],
+            [
+                'name' => 'Protein',
+                'measurement_unit' => 'g',
+                'gdf15_effect' => 'Anti-inflammatory',
+                'gdf15_points' => 0,
+                'foods' => ['Fatty fish', 'Legumes', 'Tofu'],
+            ],
+            [
+                'name' => 'Whole Grains',
+                'measurement_unit' => 'g',
+                'gdf15_effect' => 'Anti-inflammatory',
+                'gdf15_points' => 0,
+                'foods' => ['Quinoa', 'Oats', 'Barley'],
+            ],
+            [
+                'name' => 'Spices & Herbs',
+                'measurement_unit' => 'g',
+                'gdf15_effect' => 'Anti-inflammatory',
+                'gdf15_points' => 0,
+                'foods' => ['Turmeric', 'Ginger', 'Garlic'],
+            ],
+            [
+                'name' => 'Others',
+                'measurement_unit' => 'ml',
+                'gdf15_effect' => 'Anti-inflammatory',
+                'gdf15_points' => 0,
+                'foods' => ['Green tea', 'Kefir', 'Fermented foods'],
+            ],
+            [
+                'name' => 'Grains & Carbs',
+                'measurement_unit' => 'g',
+                'gdf15_effect' => 'Mixed',
+                'gdf15_points' => 5,
+                'foods' => ['White rice', 'Pasta', 'Corn'],
             ],
             [
                 'name' => 'Dairy',
                 'measurement_unit' => 'ml',
-                'gdf15_effect' => 'decrease',
-                'gdf15_points' => -5,
-                'foods' => [
-                    'Milk' => 'A nutritious liquid dairy product rich in calcium.',
-                    'Cheese' => 'A solid dairy product made from milk, rich in protein and fat.',
-                ],
+                'gdf15_effect' => 'Mixed',
+                'gdf15_points' => 5,
+                'foods' => ['Milk', 'Cheese', 'Yogurt (sweetened)'],
+            ],
+            [
+                'name' => 'Animal Protein',
+                'measurement_unit' => 'g',
+                'gdf15_effect' => 'Mixed',
+                'gdf15_points' => 5,
+                'foods' => ['Chicken', 'Eggs', 'Lean beef'],
+            ],
+            [
+                'name' => 'Snacks',
+                'measurement_unit' => 'g',
+                'gdf15_effect' => 'Mixed',
+                'gdf15_points' => 5,
+                'foods' => ['Nut butters (with additives)', 'Protein bars'],
+            ],
+            [
+                'name' => 'Processed Meats',
+                'measurement_unit' => 'g',
+                'gdf15_effect' => 'Pro-inflammatory',
+                'gdf15_points' => 10,
+                'foods' => ['Bacon', 'Sausage', 'Deli meats'],
+            ],
+            [
+                'name' => 'Fried & Fast Food',
+                'measurement_unit' => 'g',
+                'gdf15_effect' => 'Pro-inflammatory',
+                'gdf15_points' => 10,
+                'foods' => ['French fries', 'Fried chicken', 'Burgers'],
+            ],
+            [
+                'name' => 'Sugary & Refined Carbs',
+                'measurement_unit' => 'g',
+                'gdf15_effect' => 'Pro-inflammatory',
+                'gdf15_points' => 10,
+                'foods' => ['Soda', 'Pastries', 'Cookies', 'White bread'],
+            ],
+            [
+                'name' => 'Additives & Preserved',
+                'measurement_unit' => 'g',
+                'gdf15_effect' => 'Pro-inflammatory',
+                'gdf15_points' => 10,
+                'foods' => ['MSG', 'Nitrates', 'Artificial sweeteners'],
+            ],
+            [
+                'name' => 'Beverages',
+                'measurement_unit' => 'ml',
+                'gdf15_effect' => 'Pro-inflammatory',
+                'gdf15_points' => 10,
+                'foods' => ['Sugary juices', 'Beer', 'Sweet cocktails'],
             ],
         ];
 
@@ -54,10 +133,10 @@ class FoodSeeder extends Seeder
                 'gdf15_points' => $data['gdf15_points'],
             ]);
 
-            foreach ($data['foods'] as $foodName => $description) {
+            foreach ($data['foods'] as $foodName) {
                 Food::create([
                     'name' => $foodName,
-                    'description' => $description,
+                    'description' => $foodName . ' - no description yet.',
                     'category_id' => $category->id,
                 ]);
             }

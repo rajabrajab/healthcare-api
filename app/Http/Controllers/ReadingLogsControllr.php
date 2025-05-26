@@ -6,6 +6,7 @@ use App\Constants\ResponseMessages;
 use App\Models\ReadingLog;
 use App\Services\ReadingLogService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ReadingLogsControllr extends Controller
 {
@@ -22,7 +23,11 @@ class ReadingLogsControllr extends Controller
             'reading_date' => 'required|date',
             'reading_time' => 'required|date_format:H:i',
             'reading' => 'required|integer',
+            'drug_response' => 'required|string',
+            'eaze_diabetes' => 'required|string',
         ]);
+
+        $data['user_id'] = Auth::id();
 
         $log = $this->readingLogService->store($data);
 

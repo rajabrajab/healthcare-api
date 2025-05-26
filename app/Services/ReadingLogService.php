@@ -3,9 +3,17 @@
 namespace App\Services;
 
 use App\Models\ReadingLog;
+use Illuminate\Support\Facades\Auth;
 
 class ReadingLogService
 {
+    protected $user;
+
+    public function __construct()
+    {
+        $this->user = Auth::user();
+    }
+
     public function store($data)
     {
         return ReadingLog::create($data);
@@ -13,13 +21,18 @@ class ReadingLogService
 
     public function getReadingsByDate(string $date)
     {
-        $readings = ReadingLog::whereDate('reading_date', $date)
+        $userId = $this->user->id;
+
+        $readings = ReadingLog::where('user_id', $userId)
+            ->whereDate('reading_date', $date)
             ->orderBy('reading_time')
-            ->get(['reading_time', 'reading'])
+            ->get(['reading_time', 'reading','eaze_diabetes','drug_response'])
             ->map(function ($log) {
                 return [
                     'time' => $log->formatted_time,
                     'reading' => $log->reading,
+                    'eaze_diabetes' => $log->eaze_diabetes,
+                    'drug_response' => $log->drug_response,
                 ];
         });
 
@@ -35,7 +48,9 @@ class ReadingLogService
 
     public function getStatisticsByDate()
     {
-        $readings = ReadingLog::get()->pluck('reading');
+        $readings = ReadingLog::where('user_id', $this->user->id)
+        ->get()
+        ->pluck('reading');
 
         if ($readings->isEmpty()) {
             return [

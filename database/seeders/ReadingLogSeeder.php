@@ -21,6 +21,8 @@ class ReadingLogSeeder extends Seeder
             ReadingLog::create([
                 'reading_date' => $readingDate->toDateString(),
                 'reading_time' => $readingTime,
+                'eaze_diabetes' => 'eaze diabetes',
+                'drug_response' => 'drug response',
                 'reading' => rand(80, 160),
             ]);
         }

@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('food_categories', function (Blueprint $table) {
+        Schema::create('life_style_logs', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('measurement_unit');
-            $table->enum('gdf15_effect', ['Anti-inflammatory', 'Mixed', 'Pro-inflammatory']);
-            $table->integer('gdf15_points');
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('life_style_behavior_id')->constrained()->cascadeOnDelete();
+            $table->string('value');
+            $table->integer('total_gdf15_effect');
+            $table->dateTime('logged_at');
             $table->timestamps();
         });
     }
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('food_categories');
+        Schema::dropIfExists('lifestyle_logs');
     }
 };

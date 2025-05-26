@@ -4,8 +4,11 @@ namespace App\Services;
 
 use App\Http\Resources\CategoryWithFoods;
 use App\Http\Resources\FavoriteFoodCategoryResource;
+use App\Models\Food;
 use App\Models\FoodCategory;
+use App\Models\FoodLog;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class FoodService
 {
@@ -16,9 +19,13 @@ class FoodService
         $this->user = Auth::user();
     }
 
-    public function getFoodsGroupedByCategory()
+    public function getFoodsGroupedByCategory(?string $search = null)
     {
-        $categories = FoodCategory::with('foods')->get();
+        $categories = FoodCategory::with(['foods' => function($query) use ($search) {
+            if ($search) {
+                $query->where('name', 'like', '%' . $search . '%');
+            }
+        }])->get();
 
         return CategoryWithFoods::collection($categories);
     }
@@ -43,5 +50,34 @@ class FoodService
     public function addFoodToUserDiet(array $foodIds)
     {
         return $this->user->userDiet()->syncWithoutDetaching($foodIds);
+    }
+
+    public function logFoodIntake(array $data)
+    {
+        $food = Food::findOrFail($data['food_id']);
+
+        $totalEffect = $food->category->gdf15_points * $data['quantity'];
+
+        return FoodLog::create([
+            'user_id' => $this->user->id,
+            'food_id' => $food->id,
+            'taken_at' => Carbon::now(),
+            'quantity' => $data['quantity'],
+            'total_gdf15_effect' => $totalEffect,
+        ]);
+    }
+
+    public function getDailyDietScoreByHour(): array
+    {
+        $startOfDay = Carbon::now()->startOfDay();
+        $endOfDay = Carbon::now()->endOfDay();
+
+        return FoodLog::where('user_id', $this->user->id)
+            ->whereBetween('taken_at', [$startOfDay, $endOfDay])
+            ->selectRaw("DATE_FORMAT(taken_at, '%h:%i %p') as time, SUM(total_gdf15_effect) as points")
+            ->groupBy('time')
+            ->orderByRaw("STR_TO_DATE(time, '%h:%i %p')")
+            ->get()
+            ->toArray();
     }
 }

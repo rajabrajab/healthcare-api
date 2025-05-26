@@ -15,9 +15,10 @@ class FoodController extends Controller
         $this->foodService = $foodService;
     }
 
-    public function foodsByBategory(FoodService $foodService)
+    public function foodsByBategory(Request $request)
     {
-        $data = $foodService->getFoodsGroupedByCategory();
+        $search = $request->query('search');
+        $data = $this->foodService->getFoodsGroupedByCategory($search);
 
         return response()->data($data,ResponseMessages::INDEX_SUCCESS);
     }
@@ -38,5 +39,22 @@ class FoodController extends Controller
         $this->foodService->addFoodToUserDiet($validated['food_ids']);
 
         return response()->data('User Diet updated successfully.');
+    }
+
+    public function logFood(Request $request)
+    {
+        $data = $request->validate([
+            'food_id' => 'required|exists:foods,id',
+            'quantity' => 'required|integer|min:1',
+        ]);
+        $log = $this->foodService->logFoodIntake($data);
+
+
+        return response()->data($log, 'Food logged successfully.');
+    }
+
+    public function getDailyScoreByHour()
+    {
+        return response()->data($this->foodService->getDailyDietScoreByHour());
     }
 }

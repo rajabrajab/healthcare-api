@@ -13,9 +13,12 @@ return new class extends Migration
     {
         Schema::create('reading_logs', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->integer('reading');
             $table->date('reading_date');
             $table->time('reading_time');
+            $table->string('eaze_diabetes');
+            $table->string('drug_response');
             $table->timestamps();
         });
     }

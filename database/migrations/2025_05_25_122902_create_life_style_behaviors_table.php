@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('food_categories', function (Blueprint $table) {
+        Schema::create('life_style_behaviors', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('measurement_unit');
-            $table->enum('gdf15_effect', ['Anti-inflammatory', 'Mixed', 'Pro-inflammatory']);
-            $table->integer('gdf15_points');
+            $table->string('unit');
+            $table->json('enum_values')->nullable();
             $table->timestamps();
         });
     }
@@ -26,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('food_categories');
+        Schema::dropIfExists('lifestyle_behaviors');
     }
 };
