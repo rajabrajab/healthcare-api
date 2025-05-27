@@ -18,7 +18,7 @@ return new class extends Migration
             $table->date('reading_date');
             $table->time('reading_time');
             $table->string('eaze_diabetes');
-            $table->string('drug_response');
+            $table->string('drug_response')->nullable();
             $table->timestamps();
         });
     }

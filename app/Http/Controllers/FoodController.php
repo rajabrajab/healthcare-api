@@ -29,6 +29,13 @@ class FoodController extends Controller
         return response()->data($data, ResponseMessages::INDEX_SUCCESS);
     }
 
+    public function deleteFromUserDiet($foodId)
+    {
+        $this->foodService->deleteFromUserDiet($foodId);
+
+        return response()->data(ResponseMessages::DELETE_SUCCESS);
+    }
+
     public function addFoodToDiet(Request $request)
     {
         $validated = $request->validate([
@@ -44,17 +51,26 @@ class FoodController extends Controller
     public function logFood(Request $request)
     {
         $data = $request->validate([
-            'food_id' => 'required|exists:foods,id',
-            'quantity' => 'required|integer|min:1',
+            'foods' => 'required|array|min:1',
+            'foods.*.food_id' => 'required|exists:foods,id',
+            'foods.*.quantity' => 'required|integer|min:1',
         ]);
-        $log = $this->foodService->logFoodIntake($data);
+
+        $log = $this->foodService->logFoodIntake($data['foods']);
 
 
         return response()->data($log, 'Food logged successfully.');
     }
 
-    public function getDailyScoreByHour()
+    public function getFoodLog(Request $request)
     {
-        return response()->data($this->foodService->getDailyDietScoreByHour());
+
+        $data = $this->foodService->getFoodLog($request->query('date'));
+        return response()->data($data,ResponseMessages::INDEX_SUCCESS);
+    }
+
+    public function getDailyScoreByHour(Request $request)
+    {
+        return response()->data($this->foodService->getDailyDietScoreByHour($request->query('date')));
     }
 }

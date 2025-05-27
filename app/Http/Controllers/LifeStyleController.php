@@ -25,17 +25,18 @@ class LifeStyleController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'life_style_behavior_id' => 'required|exists:life_style_behaviors,id',
-            'value' => 'required|string',
+            'lifestylies' => 'required|array|min:1',
+            'lifestylies.*.life_style_behavior_id' => 'required|exists:life_style_behaviors,id',
+            'lifestylies.*.value' => 'required',
         ]);
 
-        $log = $this->lifeStyleService->logLifeStyle($validated);
+        $logs = $this->lifeStyleService->logLifeStyle($validated['lifestylies']);
 
-        return response()->data($log, 'Life logged successfully.');
+        return response()->data($logs, 'Lifestyle logged successfully.');
     }
 
-    public function getDailyScoreByHour()
+    public function getDailyScoreByHour(Request $request)
     {
-        return response()->data($this->lifeStyleService->getDailyLifeStyleScoreByHour());
+        return response()->data($this->lifeStyleService->getDailyLifeStyleScoreByHour($request->query('date')));
     }
 }

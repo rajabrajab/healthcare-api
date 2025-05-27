@@ -22,26 +22,33 @@ class LifeStyleService
 
     }
 
-    public function logLifeStyle(array $data)
+    public function logLifeStyle(array $lifestylies)
     {
-        $behavior = LifeStyleBehavior::findOrFail($data['life_style_behavior_id']);
-        $value = $data['value'];
+        $logs = [];
 
-        $effect = $this->calculateGdf15Effect($behavior, $value);
+        foreach ($lifestylies as $entry) {
+            $behavior = LifeStyleBehavior::findOrFail($entry['life_style_behavior_id']);
+            $value = $entry['value'];
+            $effect = $this->calculateGdf15Effect($behavior, $value);
 
-        return LifeStyleLog::create([
-            'user_id' => $this->user->id,
-            'life_style_behavior_id' => $behavior->id,
-            'value' => $value,
-            'total_gdf15_effect' => $effect,
-            'logged_at' => Carbon::now(),
-        ]);
+            $log = LifeStyleLog::create([
+                'user_id' => $this->user->id,
+                'life_style_behavior_id' => $behavior->id,
+                'value' => $value,
+                'total_gdf15_effect' => $effect,
+                'logged_at' => Carbon::now(),
+            ]);
+
+        $logs[] = $log;
     }
 
-    public function getDailyLifeStyleScoreByHour(): array
+    return $logs;
+    }
+
+    public function getDailyLifeStyleScoreByHour($date): array
     {
-        $startOfDay = Carbon::now()->startOfDay();
-        $endOfDay = Carbon::now()->endOfDay();
+        $startOfDay = Carbon::parse($date)->startOfDay();
+        $endOfDay = Carbon::parse($date)->endOfDay();
 
         return  LifeStyleLog::where('user_id', $this->user->id)
             ->whereBetween('logged_at', [$startOfDay, $endOfDay])

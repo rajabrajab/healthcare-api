@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Http\Resources\CategoryWithFoods;
 use App\Http\Resources\FavoriteFoodCategoryResource;
+use App\Http\Resources\FoodLogCategoryResource;
 use App\Models\Food;
 use App\Models\FoodCategory;
 use App\Models\FoodLog;
@@ -52,25 +53,54 @@ class FoodService
         return $this->user->userDiet()->syncWithoutDetaching($foodIds);
     }
 
-    public function logFoodIntake(array $data)
+    public function logFoodIntake(array $foods)
     {
-        $food = Food::findOrFail($data['food_id']);
+        $createdLogs = [];
 
-        $totalEffect = $food->category->gdf15_points * $data['quantity'];
+        foreach ($foods as $entry) {
+            $food = Food::findOrFail($entry['food_id']);
 
-        return FoodLog::create([
-            'user_id' => $this->user->id,
-            'food_id' => $food->id,
-            'taken_at' => Carbon::now(),
-            'quantity' => $data['quantity'],
-            'total_gdf15_effect' => $totalEffect,
-        ]);
+            $totalEffect = $food->category->gdf15_points * $entry['quantity'];
+
+            $log = FoodLog::create([
+                'user_id' => $this->user->id,
+                'food_id' => $food->id,
+                'taken_at' => Carbon::now(),
+                'quantity' => $entry['quantity'],
+                'total_gdf15_effect' => $totalEffect,
+            ]);
+
+            $createdLogs[] = $log;
+        }
+
+        return $createdLogs;
     }
 
-    public function getDailyDietScoreByHour(): array
+    public function getFoodLog($date)
     {
-        $startOfDay = Carbon::now()->startOfDay();
-        $endOfDay = Carbon::now()->endOfDay();
+        $day = Carbon::parse($date)->toDateString();
+
+        $logs = $this->user->userFoodLogs()
+                ->with('food.category')
+                ->whereDate('taken_at',$day)
+                ->get();
+
+        $grouped = $logs->groupBy(fn($log) => $log->food->category->id)
+                    ->map(function ($logs) {
+                        return [
+                            'category' => $logs->first()->food->category,
+                            'logs' => $logs,
+                        ];
+                    })
+                    ->values();
+
+        return FoodLogCategoryResource::collection($grouped);
+    }
+
+    public function getDailyDietScoreByHour($date): array
+    {
+        $startOfDay = Carbon::parse($date)->startOfDay();
+        $endOfDay = Carbon::parse($date)->endOfDay();
 
         return FoodLog::where('user_id', $this->user->id)
             ->whereBetween('taken_at', [$startOfDay, $endOfDay])
@@ -79,5 +109,10 @@ class FoodService
             ->orderByRaw("STR_TO_DATE(time, '%h:%i %p')")
             ->get()
             ->toArray();
+    }
+
+    public function deleteFromUserDiet(int $foodId)
+    {
+        return $this->user->userDiet()->detach($foodId) > 0;
     }
 }

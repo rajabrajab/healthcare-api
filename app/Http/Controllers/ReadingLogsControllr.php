@@ -23,7 +23,7 @@ class ReadingLogsControllr extends Controller
             'reading_date' => 'required|date',
             'reading_time' => 'required|date_format:H:i',
             'reading' => 'required|integer',
-            'drug_response' => 'required|string',
+            'drug_response' => 'nullable|string',
             'eaze_diabetes' => 'required|string',
         ]);
 

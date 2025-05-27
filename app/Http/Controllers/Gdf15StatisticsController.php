@@ -30,23 +30,31 @@ class Gdf15StatisticsController extends Controller
         $foodStats = $this->foodService->getDailyDietScoreByHour($date);
         $lifestyleStats = $this->lifeStyleService->getDailyLifeStyleScoreByHour($date);
 
-        $tracking = Gdf15Tracking::where('user_id', $userId)
-            ->where('tracking_date', $date)
-            ->first();
+        $combinedStats = collect();
 
-        $trackingStats = [];
-
-        if ($tracking) {
-            $trackingStats[] = [
-                'time' => Carbon::parse($tracking->created_at)->format('h:i A'),
-                'points' => $tracking->total_gdf15_effect,
-            ];
+        foreach ($foodStats as $stat) {
+            $combinedStats->push([
+                'time' => $stat['time'] ?? null,
+                'points' => $stat['points'] ?? 0,
+                'type' => 'food',
+            ]);
         }
+
+        foreach ($lifestyleStats as $stat) {
+            $combinedStats->push([
+                'time' => $stat['time'] ?? null,
+                'points' => $stat['points'] ?? 0,
+                'type' => 'lifestyle'
+            ]);
+        }
+
+
+        $combinedStats = $combinedStats->sortBy('time')->values();
 
         return response()->data([
             'food_log_stats' => $foodStats,
             'lifestyle_log_stats' => $lifestyleStats,
-            'gdf15_tracking_stats' => $trackingStats,
+            'gdf15_tracking_stats' => $combinedStats,
         ]);
     }
 }

@@ -19,11 +19,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reading-logs/statistics', [ReadingLogsControllr::class, 'statistics']);
 
     //foods apis
-    Route::get('/foods-by-category', [FoodController::class, 'foodsByBategory']);
-    Route::post('/add-diet', [FoodController::class, 'addFoodToDiet']);
-    Route::get('/diets', [FoodController::class, 'userDiet']);
+    Route::get('/foods/by-category', [FoodController::class, 'foodsByBategory']);
+    Route::post('/foods/add-diet', [FoodController::class, 'addFoodToDiet']);
+    Route::get('/foods/diets', [FoodController::class, 'userDiet']);
     Route::post('/foods/log', [FoodController::class, 'logFood']);
-
+    Route::get('/foods/log', [FoodController::class, 'getFoodLog']);
+    Route::delete('/foods/diets/{foodId}', [FoodController::class, 'deleteFromUserDiet']);
     Route::get('/foods/daily-score-by-hour', [FoodController::class, 'getDailyScoreByHour']);
 
     //life-styel apis
