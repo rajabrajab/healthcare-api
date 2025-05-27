@@ -14,5 +14,8 @@ class DatabaseSeeder extends Seeder
         $this->call(FoodSeeder::class);
         $this->call(LifeStyleSeeder::class);
         $this->call(FoodSeeder::class);
+
+        $this->call(LifeStyleSeeder::class);
+        $this->call(FoodLogSeeder::class);
     }
 }
