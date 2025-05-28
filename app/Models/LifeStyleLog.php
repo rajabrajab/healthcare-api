@@ -14,4 +14,9 @@ class LifeStyleLog extends BaseModel
             Gdf15Tracking::updateEffect($log->user_id, $date, $log->total_gdf15_effect,'lifestyle');
         });
     }
+
+    public function lifeStyle()
+    {
+        return $this->belongsTo(LifeStyleBehavior::class,'life_style_behavior_id');
+    }
 }

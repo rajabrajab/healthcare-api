@@ -29,8 +29,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //life-styel apis
     Route::get('/life-styles', [LifeStyleController::class, 'index']);
-    Route::post('/life-style-logs', [LifeStyleController::class, 'store']);
-    Route::get('/life-style/daily-score-by-hour', [LifeStyleController::class, 'getDailyScoreByHour']);
+    Route::post('/life-styles/log', [LifeStyleController::class, 'store']);
+    Route::get('/life-styles/log', [LifeStyleController::class, 'getLifeStyleLog']);
+    Route::get('/life-styles/daily-score-by-hour', [LifeStyleController::class, 'getDailyScoreByHour']);
 
     //add-charts
     Route::get('/gdf15-traking-charts', [Gdf15StatisticsController::class, 'byDate']);

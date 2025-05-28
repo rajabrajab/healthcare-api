@@ -39,4 +39,11 @@ class LifeStyleController extends Controller
     {
         return response()->data($this->lifeStyleService->getDailyLifeStyleScoreByHour($request->query('date')));
     }
+
+    public function getLifeStyleLog(Request $request)
+    {
+
+        $data = $this->lifeStyleService->getLifeStyleLog($request->query('date'));
+        return response()->data($data,ResponseMessages::INDEX_SUCCESS);
+    }
 }

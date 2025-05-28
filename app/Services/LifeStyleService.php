@@ -39,10 +39,10 @@ class LifeStyleService
                 'logged_at' => Carbon::now(),
             ]);
 
-        $logs[] = $log;
-    }
+            $logs[] = $log;
+        }
 
-    return $logs;
+        return $logs;
     }
 
     public function getDailyLifeStyleScoreByHour($date): array
@@ -108,5 +108,29 @@ class LifeStyleService
             default:
                 return 0;
         }
+    }
+
+    public function getLifeStyleLog($date)
+    {
+        $day = Carbon::parse($date)->toDateString();
+
+        $logs = $this->user->userLifeStyleLogs()
+                ->with('lifeStyle')
+                ->whereDate('logged_at',$day)
+                ->get();
+
+        $logs = $logs->map(function ($log) {
+
+            if (!$log->lifeStyle) return null;
+
+            return [
+                'name' => $log->lifeStyle->name,
+                'unit' => $log->lifeStyle->unit,
+                'value' => $log->value
+            ];
+        })->filter()->values();
+
+
+        return $logs;
     }
 }

@@ -19,6 +19,7 @@ class ReadingLogSeeder extends Seeder
             $readingTime = Carbon::createFromTime(rand(6, 20), 0, 0)->format('H:i:s');
 
             ReadingLog::create([
+                'user_id' => 1,
                 'reading_date' => $readingDate->toDateString(),
                 'reading_time' => $readingTime,
                 'eaze_diabetes' => 'eaze diabetes',

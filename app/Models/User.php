@@ -39,4 +39,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(FoodLog::class);
     }
+
+    public function userLifeStyleLogs()
+    {
+        return $this->hasMany(LifeStyleLog::class);
+    }
 }
