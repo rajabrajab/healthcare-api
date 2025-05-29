@@ -40,7 +40,7 @@ class ReadingLogService
                 $orderBy = "DAY(reading_date)";
                 break;
 
-            default: // day
+            default:
                 $start = $date->copy()->startOfDay();
                 $end = $date->copy()->endOfDay();
                 $groupFormat = "DATE_FORMAT(reading_time, '%h:%i %p')";
@@ -48,28 +48,26 @@ class ReadingLogService
                 break;
         }
 
-        // Fetch all readings in the range
         $logs = ReadingLog::where('user_id', $userId)
             ->whereBetween('reading_date', [$start, $end])
             ->orderBy('reading_date')
             ->orderBy('reading_time')
             ->get();
 
-        // Group and format manually in PHP
         $grouped = $logs->groupBy(function ($log) use ($type) {
             return match ($type) {
-                'week' => Carbon::parse($log->reading_date)->format('l'),     // Sunday, Monday, ...
-                'month' => Carbon::parse($log->reading_date)->format('j'),     // 1, 2, 3...
-                default => Carbon::parse($log->reading_time)->format('g:i A'), // 8:00 AM, ...
+                'week' => Carbon::parse($log->reading_date)->format('l'),
+                'month' => Carbon::parse($log->reading_date)->format('j'),
+                default => Carbon::parse($log->reading_time)->format('g:i A'),
             };
         });
 
         // Format result per group
         $result = $grouped->map(function ($items, $key) {
-            $first = $items->first(); // Or you could use last() or some other logic
+            $first = $items->first();
             return [
                 'time' => $key,
-                'reading' => $items->sum('reading'), // still summed if needed
+                'points' => $items->sum('reading'), // still summed if needed
                 'eaze_diabetes' => $first->eaze_diabetes,
                 'drug_response' => $first->drug_response,
             ];
