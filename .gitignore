@@ -22,3 +22,8 @@ yarn-error.log
 /.vscode
 /.zed
 /public
+/vendor
+.htaccess
+.favicon.ico
+index.php
+rebots.txt

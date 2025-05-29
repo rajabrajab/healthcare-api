@@ -20,5 +20,14 @@ class AdminSeeder extends Seeder
             ];
 
         User::firstOrCreate($adminUsersData);
+
+        $adminUsersData2 =
+            [
+                'email'     => 'admin2@gmail.com',
+                'name' => 'admin2',
+                'password'  => Hash::make('password')
+            ];
+
+        User::firstOrCreate($adminUsersData2);
     }
 }
