@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\LifestyleLog;
+use App\Models\LifeStyleLog;
 use Carbon\Carbon;
 
 class LifestyleLogSeeder extends Seeder
@@ -97,7 +97,7 @@ class LifestyleLogSeeder extends Seeder
 
         $gdf15Effect = $behavior['gdf15_effects'][array_rand($behavior['gdf15_effects'])];
 
-        LifestyleLog::create([
+        LifeStyleLog::create([
             'user_id' => 1,
             'life_style_behavior_id' => $behavior['id'],
             'value' => $value,
