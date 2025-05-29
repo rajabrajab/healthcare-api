@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\ReadingLog;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class ReadingLogService
@@ -19,31 +20,64 @@ class ReadingLogService
         return ReadingLog::create($data);
     }
 
-    public function getReadingsByDate(string $date)
+    public function getReadingsByDate(string $date, $type = 'day')
     {
+        $date = Carbon::parse($date);
         $userId = $this->user->id;
 
-        $readings = ReadingLog::where('user_id', $userId)
-            ->whereDate('reading_date', $date)
-            ->orderBy('reading_time')
-            ->get(['reading_time', 'reading','eaze_diabetes','drug_response'])
-            ->map(function ($log) {
-                return [
-                    'time' => $log->formatted_time,
-                    'reading' => $log->reading,
-                    'eaze_diabetes' => $log->eaze_diabetes,
-                    'drug_response' => $log->drug_response,
-                ];
-        });
+        switch ($type) {
+            case 'week':
+                $start = $date->copy()->startOfWeek();
+                $end = $date->copy()->endOfWeek();
+                $groupFormat = "DAYNAME(reading_date)";
+                $orderBy = "FIELD(DAYOFWEEK(reading_date), 1,2,3,4,5,6,7)";
+                break;
 
-        if ($readings->isEmpty()) {
-            return [
-                'time' => 0,
-                'reading' => 0
-            ];
+            case 'month':
+                $start = $date->copy()->startOfMonth();
+                $end = $date->copy()->endOfMonth();
+                $groupFormat = "DAY(reading_date)";
+                $orderBy = "DAY(reading_date)";
+                break;
+
+            default: // day
+                $start = $date->copy()->startOfDay();
+                $end = $date->copy()->endOfDay();
+                $groupFormat = "DATE_FORMAT(reading_time, '%h:%i %p')";
+                $orderBy = "STR_TO_DATE($groupFormat, '%h:%i %p')";
+                break;
         }
 
-        return $readings;
+        // Fetch all readings in the range
+        $logs = ReadingLog::where('user_id', $userId)
+            ->whereBetween('reading_date', [$start, $end])
+            ->orderBy('reading_date')
+            ->orderBy('reading_time')
+            ->get();
+
+        // Group and format manually in PHP
+        $grouped = $logs->groupBy(function ($log) use ($type) {
+            return match ($type) {
+                'week' => Carbon::parse($log->reading_date)->format('l'),     // Sunday, Monday, ...
+                'month' => Carbon::parse($log->reading_date)->format('j'),     // 1, 2, 3...
+                default => Carbon::parse($log->reading_time)->format('g:i A'), // 8:00 AM, ...
+            };
+        });
+
+        // Format result per group
+        $result = $grouped->map(function ($items, $key) {
+            $first = $items->first(); // Or you could use last() or some other logic
+            return [
+                'time' => $key,
+                'reading' => $items->sum('reading'), // still summed if needed
+                'eaze_diabetes' => $first->eaze_diabetes,
+                'drug_response' => $first->drug_response,
+            ];
+        })->values();
+
+        return $result->isEmpty()
+            ? [['time' => 0, 'reading' => 0]]
+            : $result;
     }
 
     public function getStatisticsByDate()

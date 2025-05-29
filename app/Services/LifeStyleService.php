@@ -6,6 +6,7 @@ use App\Models\LifeStyleBehavior;
 use App\Models\LifeStyleLog;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class LifeStyleService
 {
@@ -18,8 +19,7 @@ class LifeStyleService
 
     public function getLifeStyle()
     {
-        return LifeStyleBehavior::get();
-
+        return LifeStyleBehavior::get()->initializeEnumValues();
     }
 
     public function logLifeStyle(array $lifestylies)
@@ -45,20 +45,45 @@ class LifeStyleService
         return $logs;
     }
 
-    public function getDailyLifeStyleScoreByHour($date): array
+    public function getLifeStyleScoreByPeriod($date, $type = 'day'): array
     {
-        $startOfDay = Carbon::parse($date)->startOfDay();
-        $endOfDay = Carbon::parse($date)->endOfDay();
+        $date = Carbon::parse($date);
 
-        return  LifeStyleLog::where('user_id', $this->user->id)
-            ->whereBetween('logged_at', [$startOfDay, $endOfDay])
-            ->selectRaw("DATE_FORMAT(logged_at, '%h:%i %p') as time, SUM(total_gdf15_effect) as points")
-            ->groupBy('time')
-            ->orderByRaw("STR_TO_DATE(time, '%h:%i %p')")
+        switch ($type) {
+            case 'week':
+                $start = $date->copy()->startOfWeek()->startOfDay();
+                $end =  $date->copy()->endOfWeek()->endOfDay();
+                $select = "DAYNAME(logged_at) as time";
+                $groupBy = "DAYNAME(logged_at)";
+                $orderBy = "DAYOFWEEK(logged_at)";
+                break;
+
+            case 'month':
+                $start = $date->copy()->startOfMonth()->startOfDay();
+                $end = $date->copy()->endOfMonth()->endOfDay();
+                $select = "DAY(logged_at) as time";
+                $groupBy = "DAY(logged_at)";
+                $orderBy = "DAY(logged_at)";
+                break;
+
+            case 'day':
+            default:
+                $start = $date->copy()->startOfDay();
+                $end = $date->copy()->endOfDay();
+                $select = "DATE_FORMAT(logged_at, '%h:%i %p') as time";
+                $groupBy = "time";
+                $orderBy = "STR_TO_DATE(time, '%h:%i %p')";
+                break;
+        }
+
+        return LifeStyleLog::where('user_id', $this->user->id)
+            ->whereBetween('logged_at', [$start, $end])
+            ->selectRaw("$select, SUM(total_gdf15_effect) as points")
+            ->groupByRaw($groupBy)
+            ->orderByRaw($orderBy)
             ->get()
             ->toArray();
     }
-
 
     protected function calculateGdf15Effect($behavior, $value): int
     {

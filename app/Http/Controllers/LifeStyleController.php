@@ -35,9 +35,12 @@ class LifeStyleController extends Controller
         return response()->data($logs, 'Lifestyle logged successfully.');
     }
 
-    public function getDailyScoreByHour(Request $request)
+    public function getScoreStats(Request $request)
     {
-        return response()->data($this->lifeStyleService->getDailyLifeStyleScoreByHour($request->query('date')));
+        $type = $request->query('type', 'day');
+        $date = $request->query('date', now()->toDateString());
+
+        return response()->data($this->lifeStyleService->getLifeStyleScoreByPeriod($date, $type));
     }
 
     public function getLifeStyleLog(Request $request)

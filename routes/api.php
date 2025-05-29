@@ -25,13 +25,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/foods/log', [FoodController::class, 'logFood']);
     Route::get('/foods/log', [FoodController::class, 'getFoodLog']);
     Route::delete('/foods/diets/{foodId}', [FoodController::class, 'deleteFromUserDiet']);
-    Route::get('/foods/daily-score-by-hour', [FoodController::class, 'getDailyScoreByHour']);
+    Route::get('/foods/score', [FoodController::class, 'getScoreStats']);
 
     //life-styel apis
     Route::get('/life-styles', [LifeStyleController::class, 'index']);
     Route::post('/life-styles/log', [LifeStyleController::class, 'store']);
     Route::get('/life-styles/log', [LifeStyleController::class, 'getLifeStyleLog']);
-    Route::get('/life-styles/daily-score-by-hour', [LifeStyleController::class, 'getDailyScoreByHour']);
+    Route::get('/life-styles/score', [LifeStyleController::class, 'getScoreStats']);
 
     //add-charts
     Route::get('/gdf15-traking-charts', [Gdf15StatisticsController::class, 'byDate']);

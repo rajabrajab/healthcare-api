@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Gdf15Tracking;
 use App\Services\FoodService;
 use App\Services\LifeStyleService;
+use App\Services\ReadingLogService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,11 +15,13 @@ class Gdf15StatisticsController extends Controller
 
     protected $foodService;
     protected $lifeStyleService;
+    protected $readingLogService;
 
-    public function __construct(FoodService $foodService, LifeStyleService $lifeStyleService)
+    public function __construct(FoodService $foodService, LifeStyleService $lifeStyleService, ReadingLogService $readingLogService)
     {
         $this->foodService = $foodService;
         $this->lifeStyleService = $lifeStyleService;
+        $this->readingLogService = $readingLogService;
     }
 
 
@@ -26,9 +29,11 @@ class Gdf15StatisticsController extends Controller
     {
         $userId = Auth::id();
         $date = $request->input('date', Carbon::today()->toDateString());
+        $type = $request->input('type', 'day');
 
-        $foodStats = $this->foodService->getDailyDietScoreByHour($date);
-        $lifestyleStats = $this->lifeStyleService->getDailyLifeStyleScoreByHour($date);
+        $foodStats = $this->foodService->getDietScoreByPeriod($date,$type);
+        $lifestyleStats = $this->lifeStyleService->getLifeStyleScoreByPeriod($date,$type);
+        $readingStats = $this->readingLogService->getReadingsByDate($date,$type);
 
         $combinedStats = collect();
 
@@ -55,6 +60,7 @@ class Gdf15StatisticsController extends Controller
             'food_log_stats' => $foodStats,
             'lifestyle_log_stats' => $lifestyleStats,
             'gdf15_tracking_stats' => $combinedStats,
+            'reading_stats' => $readingStats
         ]);
     }
 }

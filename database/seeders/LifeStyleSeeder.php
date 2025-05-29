@@ -12,11 +12,35 @@ class LifeStyleSeeder extends Seeder
         $behaviors = [
             ['name' => 'Sleep', 'unit' => 'hrs'],
             ['name' => 'Physical Activity', 'unit' => 'mins'],
-            ['name' => 'Stress', 'unit' => 'level', 'enum_values' => ['None', 'Occasional', 'Frequent']],
+            [
+                'name' => 'Stress',
+                'unit' => 'level',
+                'enum_values' => [
+                    ['label' => 'None', 'value' => 'none'],
+                    ['label' => 'Occasional', 'value' => 'occasional'],
+                    ['label' => 'Frequent', 'value' => 'frequent']
+                ]
+            ],
             ['name' => 'Alcohol', 'unit' => 'drinks/week'],
-            ['name' => 'Smoking', 'unit' => 'status', 'enum_values' => ['Non-smoker', 'Occasional', 'Regular']],
+            [
+                'name' => 'Smoking',
+                'unit' => 'status',
+                'enum_values' => [
+                    ['label' => 'Non-smoker', 'value' => 'non_smoker'],
+                    ['label' => 'Occasional', 'value' => 'occasional'],
+                    ['label' => 'Regular', 'value' => 'regular']
+                ]
+            ],
             ['name' => 'Hydration', 'unit' => 'L'],
-            ['name' => 'Meal Timing', 'unit' => 'time', 'enum_values' => ['Before 8pm', '8–10pm', 'After 10pm']],
+            [
+                'name' => 'Meal Timing',
+                'unit' => 'time',
+                'enum_values' => [
+                    ['label' => 'Before 8pm', 'value' => 'before_8pm'],
+                    ['label' => '8–10pm', 'value' => '8_to_10pm'],
+                    ['label' => 'After 10pm', 'value' => 'after_10pm']
+                ]
+            ],
         ];
 
         foreach ($behaviors as $b) {

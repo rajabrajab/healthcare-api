@@ -97,20 +97,45 @@ class FoodService
         return FoodLogCategoryResource::collection($grouped);
     }
 
-    public function getDailyDietScoreByHour($date): array
+    public function getDietScoreByPeriod($date, $type = 'day'): array
     {
-        $startOfDay = Carbon::parse($date)->startOfDay();
-        $endOfDay = Carbon::parse($date)->endOfDay();
+        $date = Carbon::parse($date);
+
+        switch ($type) {
+            case 'week':
+                $start = $date->copy()->startOfWeek()->startOfDay();
+                $end = $date->copy()->endOfWeek()->endOfDay();
+                $select = "DAYNAME(taken_at) as time";
+                $groupBy = "DAYNAME(taken_at)";
+                $orderBy = "DAYOFWEEK(taken_at)";
+                break;
+
+            case 'month':
+                $start = $date->copy()->startOfMonth()->startOfDay();
+                $end = $date->copy()->endOfMonth()->endOfDay();
+                $select = "DAY(taken_at) as time";
+                $groupBy = "DAY(taken_at)";
+                $orderBy = "DAY(taken_at)";
+                break;
+
+            case 'day':
+            default:
+                $start = $date->copy()->startOfDay();
+                $end = $date->copy()->endOfDay();
+                $select = "DATE_FORMAT(taken_at, '%h:%i %p') as time";
+                $groupBy = "time";
+                $orderBy = "STR_TO_DATE(time, '%h:%i %p')";
+                break;
+        }
 
         return FoodLog::where('user_id', $this->user->id)
-            ->whereBetween('taken_at', [$startOfDay, $endOfDay])
-            ->selectRaw("DATE_FORMAT(taken_at, '%h:%i %p') as time, SUM(total_gdf15_effect) as points")
-            ->groupBy('time')
-            ->orderByRaw("STR_TO_DATE(time, '%h:%i %p')")
+            ->whereBetween('taken_at', [$start, $end])
+            ->selectRaw("$select, SUM(total_gdf15_effect) as points")
+            ->groupByRaw($groupBy)
+            ->orderByRaw($orderBy)
             ->get()
             ->toArray();
     }
-
     public function deleteFromUserDiet(int $foodId)
     {
         return $this->user->userDiet()->detach($foodId) > 0;

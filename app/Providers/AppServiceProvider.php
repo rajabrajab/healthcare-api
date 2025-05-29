@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Collection;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +20,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Collection::macro('initializeEnumValues', function () {
+            return $this->map(function ($item) {
+                if (method_exists($item, 'initializeEnumValues')) {
+                    return $item->initializeEnumValues();
+                }
+                return $item;
+            });
+        });
     }
 }

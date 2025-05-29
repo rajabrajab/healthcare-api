@@ -69,8 +69,13 @@ class FoodController extends Controller
         return response()->data($data,ResponseMessages::INDEX_SUCCESS);
     }
 
-    public function getDailyScoreByHour(Request $request)
+    public function getScoreStats(Request $request)
     {
-        return response()->data($this->foodService->getDailyDietScoreByHour($request->query('date')));
+        $type = $request->query('type', 'day');
+        $date = $request->query('date', now()->toDateString());
+
+        return response()->data(
+            $this->foodService->getDietScoreByPeriod($date, $type)
+        );
     }
 }
