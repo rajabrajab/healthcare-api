@@ -67,14 +67,14 @@ class ReadingLogService
             $first = $items->first();
             return [
                 'time' => $key,
-                'points' => $items->sum('reading'), // still summed if needed
+                'points' => $items->sum('reading'),
                 'eaze_diabetes' => $first->eaze_diabetes,
                 'drug_response' => $first->drug_response,
             ];
         })->values();
 
         return $result->isEmpty()
-            ? [['time' => 0, 'reading' => 0]]
+            ? []
             : $result;
     }
 
