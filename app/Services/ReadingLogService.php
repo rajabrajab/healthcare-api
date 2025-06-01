@@ -67,7 +67,7 @@ class ReadingLogService
             $first = $items->first();
             return [
                 'time' => $key,
-                'points' => $items->sum('reading'),
+                'points' =>  (string) $items->sum('reading'),
                 'eaze_diabetes' => $first->eaze_diabetes,
                 'drug_response' => $first->drug_response,
             ];
