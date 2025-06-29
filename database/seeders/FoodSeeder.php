@@ -123,6 +123,13 @@ class FoodSeeder extends Seeder
                 'gdf15_points' => 10,
                 'foods' => ['Sugary juices', 'Beer', 'Sweet cocktails'],
             ],
+            [
+                'name' => 'Custom Foods',
+                'measurement_unit' => 'g',
+                'gdf15_effect' => 'Anti-inflammatory',
+                'gdf15_points' =>  0,
+                'foods' => []
+            ]
         ];
 
         foreach ($categories as $data) {

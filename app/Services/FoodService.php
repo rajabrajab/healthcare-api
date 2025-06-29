@@ -60,7 +60,9 @@ class FoodService
         foreach ($foods as $entry) {
             $food = Food::findOrFail($entry['food_id']);
 
-            $totalEffect = $food->category->gdf15_points * $entry['quantity'];
+            $gdf15Points = $food->gdf15_points ?? $food->category->gdf15_points;
+
+            $totalEffect = $gdf15Points * $entry['quantity'];
 
             $log = FoodLog::create([
                 'user_id' => $this->user->id,
@@ -139,5 +141,20 @@ class FoodService
     public function deleteFromUserDiet(int $foodId)
     {
         return $this->user->userDiet()->detach($foodId) > 0;
+    }
+
+    public function createCustomFood($data)
+    {
+        $customCategory = FoodCategory::where('name', 'Custom Foods')->firstOrFail();
+
+        $foodData = [
+            'name' => $data['name'],
+            'description' => $data['description'] ?? null,
+            'category_id' => $customCategory->id,
+            'user_id' => $this->user->id,
+            'gdf15_points' => $data['gdf15_points'] ?? $customCategory->gdf15_points,
+        ];
+
+        return Food::create($foodData);
     }
 }

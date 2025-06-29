@@ -78,4 +78,18 @@ class FoodController extends Controller
             $this->foodService->getDietScoreByPeriod($date, $type)
         );
     }
+
+    public function storeCustomFood(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'gdf15_points' => 'nullable|integer|min:0|max:10'
+        ]);
+
+        $food = $this->foodService->createCustomFood($validated);
+
+        return response()->data($food,ResponseMessages::CREATE_SUCCESS
+        );
+    }
 }

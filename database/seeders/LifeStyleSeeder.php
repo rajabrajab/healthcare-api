@@ -21,7 +21,7 @@ class LifeStyleSeeder extends Seeder
                     ['label' => 'Frequent', 'value' => 'frequent']
                 ]
             ],
-            ['name' => 'Alcohol', 'unit' => 'drinks/week'],
+            ['name' => 'Alcohol', 'unit' => 'drinks/day'],
             [
                 'name' => 'Smoking',
                 'unit' => 'status',
@@ -38,7 +38,8 @@ class LifeStyleSeeder extends Seeder
                 'enum_values' => [
                     ['label' => 'Before 8pm', 'value' => 'before_8pm'],
                     ['label' => '8–10pm', 'value' => '8_to_10pm'],
-                    ['label' => 'After 10pm', 'value' => 'after_10pm']
+                    ['label' => 'After 10pm', 'value' => 'after_10pm'],
+                    ['label' => 'After 10pm + ( Late snack )', 'value' => 'after_10pm_with_snack']
                 ]
             ],
         ];

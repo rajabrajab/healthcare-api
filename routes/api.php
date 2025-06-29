@@ -26,6 +26,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/foods/log', [FoodController::class, 'getFoodLog']);
     Route::delete('/foods/diets/{foodId}', [FoodController::class, 'deleteFromUserDiet']);
     Route::get('/foods/score', [FoodController::class, 'getScoreStats']);
+    Route::post('/foods/custom-food', [FoodController::class, 'storeCustomFood']);
 
     //life-styel apis
     Route::get('/life-styles', [LifeStyleController::class, 'index']);
