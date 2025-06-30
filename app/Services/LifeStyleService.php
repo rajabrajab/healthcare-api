@@ -127,7 +127,7 @@ class LifeStyleService
                     'before_8pm' => 0,
                     '8_to_10pm' => 5,
                     'after_10pm' => 10,
-                    'after_10pm_with_snack' => 10,
+                    // 'after_10pm_with_snack' => 10,
                     default => 0,
                 };
 

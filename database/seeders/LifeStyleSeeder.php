@@ -39,7 +39,7 @@ class LifeStyleSeeder extends Seeder
                     ['label' => 'Before 8pm', 'value' => 'before_8pm'],
                     ['label' => '8–10pm', 'value' => '8_to_10pm'],
                     ['label' => 'After 10pm', 'value' => 'after_10pm'],
-                    ['label' => 'After 10pm + ( Late snack )', 'value' => 'after_10pm_with_snack']
+                    // ['label' => 'After 10pm + ( Late snack )', 'value' => 'after_10pm_with_snack']
                 ]
             ],
         ];
