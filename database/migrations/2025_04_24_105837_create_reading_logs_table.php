@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->integer('reading');
             $table->date('reading_date');
-            $table->time('reading_time');
+            $table->time('reading_time')->nullable();;
             $table->string('eaze_diabetes');
             $table->string('drug_response')->nullable();
             $table->timestamps();

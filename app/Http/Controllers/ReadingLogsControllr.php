@@ -21,7 +21,7 @@ class ReadingLogsControllr extends Controller
     {
         $data = $request->validate([
             'reading_date' => 'required|date',
-            'reading_time' => 'required|date_format:H:i',
+            'reading_time' => 'nullable|date_format:H:i',
             'reading' => 'required|integer',
             'drug_response' => 'nullable|string',
             'eaze_diabetes' => 'required|string',
