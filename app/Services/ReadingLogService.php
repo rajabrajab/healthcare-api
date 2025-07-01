@@ -62,7 +62,6 @@ class ReadingLogService
             };
         });
 
-        // Format result per group
         $result = $grouped->map(function ($items, $key) {
             $first = $items->first();
             return [
@@ -72,6 +71,19 @@ class ReadingLogService
                 'drug_response' => $first->drug_response,
             ];
         })->values();
+
+        if ($type === 'week') {
+            $recentEntries = $logs->take(5)->map(function($log) {
+                return [
+                    'time' => $log->reading_date . ' ' . Carbon::parse($log->reading_time)->format('g:i A'),
+                    'points' => (string) $log->reading,
+                    'eaze_diabetes' => $log->eaze_diabetes,
+                    'drug_response' => $log->drug_response,
+                ];
+            });
+
+            $result = $result->merge($recentEntries);
+        }
 
         return $result->isEmpty()
             ? []
