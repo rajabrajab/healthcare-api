@@ -159,4 +159,31 @@ class LifeStyleService
 
         return $logs;
     }
+
+    public function getPhysicalActivityMinutes($userId, $date, $type)
+    {
+        $date = Carbon::parse($date);
+
+        switch ($type) {
+            case 'week':
+                $start = $date->copy()->startOfWeek();
+                $end = $date->copy()->endOfWeek();
+                break;
+            case 'month':
+                $start = $date->copy()->startOfMonth();
+                $end = $date->copy()->endOfMonth();
+                break;
+            default:
+                $start = $date->copy()->startOfDay();
+                $end = $date->copy()->endOfDay();
+                break;
+        }
+
+        $activityMinutes = LifestyleLog::where('user_id', $userId)
+            ->where('life_style_behavior_id', 2)
+            ->whereBetween('created_at', [$start, $end])
+            ->sum('value');
+
+        return (int) $activityMinutes;
+    }
 }

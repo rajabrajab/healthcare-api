@@ -14,7 +14,7 @@ class ReadingLogSeeder extends Seeder
 
         $date = Carbon::now()->startOfMonth();
 
-        foreach (range(1, 350) as $i) {
+        foreach (range(1, 100) as $i) {
             $readingDate = $date->copy()->addDays(rand(0, 25));
             $readingTime = Carbon::createFromTime(rand(6, 20), 0, 0)->format('H:i:s');
 

@@ -35,6 +35,8 @@ class Gdf15StatisticsController extends Controller
         $lifestyleStats = $this->lifeStyleService->getLifeStyleScoreByPeriod($date,$type);
         $readingStats = $this->readingLogService->getReadingsByDate($date,$type);
 
+        $physicalActivityMinutes = $this->lifeStyleService->getPhysicalActivityMinutes($userId, $date, $type);
+
         $combinedStats = collect();
 
         foreach ($foodStats as $stat) {
@@ -53,6 +55,14 @@ class Gdf15StatisticsController extends Controller
             ]);
         }
 
+        foreach ($readingStats as $stat) {
+            $combinedStats->push([
+                'time' => $stat['time'] ?? null,
+                'points' => $stat['points'] ?? 0,
+                'type' => 'reading'
+            ]);
+        }
+
 
         $combinedStats = $combinedStats->sortBy('time')->values();
 
@@ -60,7 +70,8 @@ class Gdf15StatisticsController extends Controller
             'food_log_stats' => $foodStats,
             'lifestyle_log_stats' => $lifestyleStats,
             'gdf15_tracking_stats' => $combinedStats,
-            'reading_stats' => $readingStats
+            'reading_stats' => $readingStats,
+            'physical_activity_minutes' => $physicalActivityMinutes
         ]);
     }
 }
