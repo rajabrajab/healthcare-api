@@ -22,7 +22,7 @@ class LifeStyleService
         return LifeStyleBehavior::get()->initializeEnumValues();
     }
 
-    public function logLifeStyle(array $lifestylies)
+    public function logLifeStyle(array $lifestylies,$date)
     {
         $logs = [];
 
@@ -31,12 +31,19 @@ class LifeStyleService
             $value = $entry['value'];
             $effect = $this->calculateGdf15Effect($behavior, $value);
 
+            $loggedAt = Carbon::parse($date)
+            ->setTime(
+                now()->hour,
+                now()->minute,
+                now()->second
+            );
+
             $log = LifeStyleLog::create([
                 'user_id' => $this->user->id,
                 'life_style_behavior_id' => $behavior->id,
                 'value' => $value,
                 'total_gdf15_effect' => $effect,
-                'logged_at' => Carbon::now(),
+                'logged_at' => $loggedAt,
             ]);
 
             $logs[] = $log;

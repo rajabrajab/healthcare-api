@@ -53,7 +53,7 @@ class FoodService
         return $this->user->userDiet()->syncWithoutDetaching($foodIds);
     }
 
-    public function logFoodIntake(array $foods)
+    public function logFoodIntake(array $foods,$date)
     {
         $createdLogs = [];
 
@@ -64,10 +64,17 @@ class FoodService
 
             $totalEffect = $gdf15Points * $entry['quantity'];
 
+            $takenAt = Carbon::parse($date)
+            ->setTime(
+                now()->hour,
+                now()->minute,
+                now()->second
+            );
+
             $log = FoodLog::create([
                 'user_id' => $this->user->id,
                 'food_id' => $food->id,
-                'taken_at' => Carbon::now(),
+                'taken_at' => $takenAt,
                 'quantity' => $entry['quantity'],
                 'total_gdf15_effect' => $totalEffect,
             ]);
