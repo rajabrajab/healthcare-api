@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::post('login', [AuthController::class, 'login']);
+Route::post('register', [AuthController::class, 'register']);
 
 //
 Route::middleware('auth:sanctum')->group(function () {
@@ -23,6 +24,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/foods/add-diet', [FoodController::class, 'addFoodToDiet']);
     Route::get('/foods/diets', [FoodController::class, 'userDiet']);
     Route::post('/foods/log', [FoodController::class, 'logFood']);
+    Route::put('/foods/log', [FoodController::class, 'updateFoodLog']);
     Route::get('/foods/log', [FoodController::class, 'getFoodLog']);
     Route::delete('/foods/diets/{foodId}', [FoodController::class, 'deleteFromUserDiet']);
     Route::get('/foods/score', [FoodController::class, 'getScoreStats']);

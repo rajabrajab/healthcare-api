@@ -10,6 +10,7 @@ use App\Models\FoodCategory;
 use App\Models\FoodLog;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class FoodService
 {
@@ -58,11 +59,7 @@ class FoodService
         $createdLogs = [];
 
         foreach ($foods as $entry) {
-            $food = Food::findOrFail($entry['food_id']);
-
-            $gdf15Points = $food->gdf15_points ?? $food->category->gdf15_points;
-
-            $totalEffect = $gdf15Points * $entry['quantity'];
+            $totalEffect = $this->calculateGdf15Effect($entry['food_id'],$entry['quantity']);
 
             $takenAt = Carbon::parse($date)
             ->setTime(
@@ -73,7 +70,7 @@ class FoodService
 
             $log = FoodLog::create([
                 'user_id' => $this->user->id,
-                'food_id' => $food->id,
+                'food_id' => $entry['food_id'],
                 'taken_at' => $takenAt,
                 'quantity' => $entry['quantity'],
                 'total_gdf15_effect' => $totalEffect,
@@ -85,23 +82,74 @@ class FoodService
         return $createdLogs;
     }
 
+   public function updateFoodLog(array $foods, $date)
+    {
+        $date = Carbon::parse($date)->toDateString();
+        $userId = $this->user->id;
+
+        $updatedLogs = [];
+
+        foreach ($foods as $entry) {
+            $log = FoodLog::where('user_id', $userId)
+                ->where('food_id', $entry['food_id'])
+                ->whereDate('taken_at', $date)
+                ->first();
+
+            if ($log) {
+                $log->quantity = $entry['quantity'];
+                $log->total_gdf15_effect = $this->calculateGdf15Effect($entry['food_id'], $entry['quantity']);
+                $log->save();
+            } else {
+                $log = FoodLog::create([
+                    'user_id' => $userId,
+                    'food_id' => $entry['food_id'],
+                    'quantity' => $entry['quantity'],
+                    'total_gdf15_effect' => $this->calculateGdf15Effect($entry['food_id'], $entry['quantity']),
+                    'taken_at' => $date,
+                ]);
+            }
+
+            $updatedLogs[] = $log;
+        }
+
+        return $updatedLogs;
+    }
+
+
     public function getFoodLog($date)
     {
         $day = Carbon::parse($date)->toDateString();
 
-        $logs = $this->user->userFoodLogs()
-                ->with('food.category')
-                ->whereDate('taken_at',$day)
-                ->get();
+        $dietFoods = $this->user->userDiet()
+            ->with('category')
+            ->get();
 
-        $grouped = $logs->groupBy(fn($log) => $log->food->category->id)
-                    ->map(function ($logs) {
-                        return [
-                            'category' => $logs->first()->food->category,
-                            'logs' => $logs,
-                        ];
-                    })
-                    ->values();
+        $loggedFoods = $this->user->userFoodLogs()
+            ->with('food.category')
+            ->whereDate('taken_at', $day)
+            ->get()
+            ->keyBy('food_id');
+
+        $combined = $dietFoods->map(function ($food) use ($loggedFoods) {
+            $log = $loggedFoods->get($food->id);
+
+            return [
+                'category' => $food->category,
+                'log' => $log ?: new FoodLog([
+                    'food' => $food,
+                    'quantity' => null
+                ])
+            ];
+        });
+
+        $grouped = $combined->groupBy(function ($item) {
+            return $item['category']->id;
+        })->map(function ($items, $categoryId) {
+            return [
+                'category' => $items->first()['category'],
+                'logs' => $items->pluck('log')
+            ];
+        })->values();
 
         return FoodLogCategoryResource::collection($grouped);
     }
@@ -163,5 +211,14 @@ class FoodService
         ];
 
         return Food::create($foodData);
+    }
+
+    private function calculateGdf15Effect($foodId,$quantity)
+    {
+        $food = Food::findOrFail($foodId);
+
+        $gdf15Points = $food->gdf15_points ?? $food->category->gdf15_points;
+
+        return $gdf15Points * $quantity;
     }
 }

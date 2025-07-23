@@ -63,6 +63,22 @@ class FoodController extends Controller
         return response()->data($log, 'Food logged successfully.');
     }
 
+    public function updateFoodLog(Request $request)
+    {
+        $data = $request->validate([
+            'foods' => 'required|array|min:1',
+            'date' => 'required|date',
+            'foods.*.food_id' => 'required|exists:foods,id',
+            'foods.*.quantity' => 'required|integer|min:1',
+        ]);
+
+        $log = $this->foodService->updateFoodLog($data['foods'],$data['date']);
+
+
+        return response()->data($log, 'Food log updated successfully.');
+
+    }
+
     public function getFoodLog(Request $request)
     {
 
