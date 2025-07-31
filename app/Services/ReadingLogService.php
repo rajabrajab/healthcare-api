@@ -22,72 +22,88 @@ class ReadingLogService
 
     public function getReadingsByDate(string $date, $type = 'day')
     {
-        $date = Carbon::parse($date);
-        $userId = $this->user->id;
+    $endDate = Carbon::now()->endOfDay();
+    $startDate = $endDate->copy()->subMonths(6)->startOfDay();
+    $userId = $this->user->id;
 
-        switch ($type) {
-            case 'week':
-                $start = $date->copy()->startOfWeek();
-                $end = $date->copy()->endOfWeek();
-                $groupFormat = "DAYNAME(reading_date)";
-                $orderBy = "FIELD(DAYOFWEEK(reading_date), 1,2,3,4,5,6,7)";
-                break;
-
-            case 'month':
-                $start = $date->copy()->startOfMonth();
-                $end = $date->copy()->endOfMonth();
-                $groupFormat = "DAY(reading_date)";
-                $orderBy = "DAY(reading_date)";
-                break;
-
-            default:
-                $start = $date->copy()->startOfDay();
-                $end = $date->copy()->endOfDay();
-                $groupFormat = "DATE_FORMAT(reading_time, '%h:%i %p')";
-                $orderBy = "STR_TO_DATE($groupFormat, '%h:%i %p')";
-                break;
-        }
-
-        $logs = ReadingLog::where('user_id', $userId)
-            ->whereBetween('reading_date', [$start, $end])
-            ->orderBy('reading_date')
-            ->orderBy('reading_time')
-            ->get();
-
-        $grouped = $logs->groupBy(function ($log) use ($type) {
-            return match ($type) {
-                'week' => Carbon::parse($log->reading_date)->format('l'),
-                'month' => Carbon::parse($log->reading_date)->format('j'),
-                default => Carbon::parse($log->reading_time)->format('g:i A'),
-            };
+    $readings = ReadingLog::where('user_id', $userId)
+        ->whereBetween('reading_date', [$startDate, $endDate])
+        ->orderBy('reading_date', 'desc')
+        ->orderBy('reading_time', 'desc')
+        ->get()
+        ->map(function ($reading) {
+            return [
+                'date' => Carbon::parse($reading->reading_date)->format('Y-m-d'),
+                'points' => (string) $reading->reading,
+                'eaze_diabetes' => $reading->eaze_diabetes,
+                'drug_response' => $reading->drug_response
+            ];
         });
 
-        $result = $grouped->map(function ($items, $key) {
-            $first = $items->first();
-            return [
-                'time' => $key,
-                'points' =>  (string) $items->sum('reading'),
-                'eaze_diabetes' => $first->eaze_diabetes,
-                'drug_response' => $first->drug_response,
-            ];
-        })->values();
+        return $readings->isEmpty() ? [] : $readings->values();
+        // switch ($type) {
+        //     case 'week':
+        //         $start = $date->copy()->startOfWeek();
+        //         $end = $date->copy()->endOfWeek();
+        //         $groupFormat = "DAYNAME(reading_date)";
+        //         $orderBy = "FIELD(DAYOFWEEK(reading_date), 1,2,3,4,5,6,7)";
+        //         break;
 
-        if ($type === 'week') {
-            $recentEntries = $logs->take(5)->map(function($log) {
-                return [
-                    'time' => $log->reading_date . ' ' . Carbon::parse($log->reading_time)->format('g:i A'),
-                    'points' => (string) $log->reading,
-                    'eaze_diabetes' => $log->eaze_diabetes,
-                    'drug_response' => $log->drug_response,
-                ];
-            });
+        //     case 'month':
+        //         $start = $date->copy()->startOfMonth();
+        //         $end = $date->copy()->endOfMonth();
+        //         $groupFormat = "DAY(reading_date)";
+        //         $orderBy = "DAY(reading_date)";
+        //         break;
 
-            $result = $result->merge($recentEntries);
-        }
+        //     default:
+        //         $start = $date->copy()->startOfDay();
+        //         $end = $date->copy()->endOfDay();
+        //         $groupFormat = "DATE_FORMAT(reading_time, '%h:%i %p')";
+        //         $orderBy = "STR_TO_DATE($groupFormat, '%h:%i %p')";
+        //         break;
+        // }
 
-        return $result->isEmpty()
-            ? []
-            : $result;
+        // $logs = ReadingLog::where('user_id', $userId)
+        //     ->whereBetween('reading_date', [$start, $end])
+        //     ->orderBy('reading_date')
+        //     ->orderBy('reading_time')
+        //     ->get();
+
+        // $grouped = $logs->groupBy(function ($log) use ($type) {
+        //     return match ($type) {
+        //         'week' => Carbon::parse($log->reading_date)->format('l'),
+        //         'month' => Carbon::parse($log->reading_date)->format('j'),
+        //         default => Carbon::parse($log->reading_time)->format('g:i A'),
+        //     };
+        // });
+
+        // $result = $grouped->map(function ($items, $key) {
+        //     $first = $items->first();
+        //     return [
+        //         'time' => $key,
+        //         'points' =>  (string) $items->sum('reading'),
+        //         'eaze_diabetes' => $first->eaze_diabetes,
+        //         'drug_response' => $first->drug_response,
+        //     ];
+        // })->values();
+
+        // if ($type === 'week') {
+        //     $recentEntries = $logs->take(5)->map(function($log) {
+        //         return [
+        //             'time' => $log->reading_date . ' ' . Carbon::parse($log->reading_time)->format('g:i A'),
+        //             'points' => (string) $log->reading,
+        //             'eaze_diabetes' => $log->eaze_diabetes,
+        //             'drug_response' => $log->drug_response,
+        //         ];
+        //     });
+
+        //     $result = $result->merge($recentEntries);
+        // }
+
+        // return $result->isEmpty()
+        //     ? []
+        //     : $result;
     }
 
     public function getStatisticsByDate()

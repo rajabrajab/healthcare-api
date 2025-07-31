@@ -31,11 +31,15 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8',
+            'gender' => 'required|in:male,female',
+            'birthday' => 'required|date|before:today',
         ]);
 
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
+            'gender' => $data['gender'],
+            'birthday' => $data['birthday'],
             'password' => Hash::make($data['password']),
         ]);
 
