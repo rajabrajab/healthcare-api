@@ -52,12 +52,11 @@ class FoodController extends Controller
     {
         $data = $request->validate([
             'foods' => 'required|array|min:1',
-            'date' => 'required|date',
             'foods.*.food_id' => 'required|exists:foods,id',
             'foods.*.quantity' => 'required|integer|min:1',
         ]);
 
-        $log = $this->foodService->logFoodIntake($data['foods'],$data['date']);
+        $log = $this->foodService->logFoodIntake($data['foods']);
 
 
         return response()->data($log, 'Food logged successfully.');
