@@ -17,13 +17,17 @@ class ReadingLogService
 
     public function store($data)
     {
+        if($data['reading'] == 'yes'){
+            $data['reading'] = 50;
+        }else{
+            $data['reading'] = 0;
+        }
+
         return ReadingLog::create($data);
     }
 
-    public function getReadingsByDate(string $date, $type = 'day')
+    public function getReadingsByDate($from_date,$end_date)
     {
-    $endDate = Carbon::now()->endOfDay();
-    $startDate = $endDate->copy()->subMonths(6)->startOfDay();
     $userId = $this->user->id;
 
     $readings = ReadingLog::where('user_id', $userId)

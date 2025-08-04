@@ -10,6 +10,7 @@ use App\Models\FoodCategory;
 use App\Models\FoodLog;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 
 class FoodService
@@ -54,9 +55,10 @@ class FoodService
         return $this->user->userDiet()->syncWithoutDetaching($foodIds);
     }
 
-    public function logFoodIntake(array $foods,$date)
+    public function logFoodIntake(array $foods)
     {
         $createdLogs = [];
+        $date = Date::now()->toDateString();
 
         foreach ($foods as $entry) {
             $totalEffect = $this->calculateGdf15Effect($entry['food_id'],$entry['quantity']);
