@@ -33,6 +33,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //life-styel apis
     Route::get('/life-styles', [LifeStyleController::class, 'index']);
     Route::post('/life-styles/log', [LifeStyleController::class, 'store']);
+    Route::put('/life-styles/log', [LifeStyleController::class, 'updateFoodLog']);
     Route::get('/life-styles/log', [LifeStyleController::class, 'getLifeStyleLog']);
     Route::get('/life-styles/score', [LifeStyleController::class, 'getScoreStats']);
 

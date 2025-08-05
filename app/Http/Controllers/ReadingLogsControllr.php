@@ -37,10 +37,10 @@ class ReadingLogsControllr extends Controller
 
     public function readingsByDate(Request $request)
     {
-        $type = $request->query('type', 'day');
-        $date = $request->query('date', now()->toDateString());
+        $fromDate = $request->input('from_date');
+        $endDate = $request->input('end_date');
 
-        $readings = $this->readingLogService->getReadingsByDate($date,$type);
+        $readings = $this->readingLogService->getReadingsByDate($fromDate,$endDate);
 
         return response()->data($readings,ResponseMessages::INDEX_SUCCESS);
     }

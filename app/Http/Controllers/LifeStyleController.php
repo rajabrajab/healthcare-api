@@ -25,7 +25,6 @@ class LifeStyleController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'date' => 'required|date',
             'lifestylies' => 'required|array|min:1',
             'lifestylies.*.life_style_behavior_id' => 'required|exists:life_style_behaviors,id',
             'lifestylies.*.value' => 'required',
@@ -34,6 +33,22 @@ class LifeStyleController extends Controller
         $logs = $this->lifeStyleService->logLifeStyle($validated['lifestylies'],$validated['date']);
 
         return response()->data($logs, 'Lifestyle logged successfully.');
+    }
+
+    public function updateFoodLog(Request $request)
+    {
+        $data = $request->validate([
+            'lifestylies' => 'required|array|min:1',
+            'date' => 'required|date',
+            'lifestylies.*.life_style_behavior_id' => 'required|exists:life_style_behaviors,id',
+            'lifestylies.*.value' => 'required',
+        ]);
+
+        $log = $this->lifeStyleService->updateLifeStyleLog($data['lifestylies'],$data['date']);
+
+
+        return response()->data($log, ' Lifestyle log updated successfully.');
+
     }
 
     public function getScoreStats(Request $request)

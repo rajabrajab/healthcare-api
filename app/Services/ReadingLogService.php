@@ -26,7 +26,7 @@ class ReadingLogService
         return ReadingLog::create($data);
     }
 
-    public function getReadingsByDate($from_date,$end_date)
+    public function getReadingsByDate($startDate,$endDate)
     {
     $userId = $this->user->id;
 
@@ -34,6 +34,7 @@ class ReadingLogService
         ->whereBetween('reading_date', [$startDate, $endDate])
         ->orderBy('reading_date', 'desc')
         ->orderBy('reading_time', 'desc')
+        ->take(6)
         ->get()
         ->map(function ($reading) {
             return [

@@ -52,6 +52,41 @@ class LifeStyleService
         return $logs;
     }
 
+    public function updateLifeStyleLog(array $lifestylies, $date)
+    {
+        $date = Carbon::parse($date)->toDateString();
+        $userId = $this->user->id;
+
+        $updatedLogs = [];
+
+        foreach ($lifestylies as $entry) {
+            $log = LifeStyleLog::where('user_id', $userId)
+                ->where('life_style_behavior_id', $entry['life_style_behavior_id'])
+                ->whereDate('logged_at', $date)
+                ->first();
+
+            $behavior = LifeStyleBehavior::findOrFail($entry['life_style_behavior_id']);
+
+            if ($log) {
+                $log->value = $entry['value'];
+                $log->total_gdf15_effect = $this->calculateGdf15Effect($behavior, $entry['value']);
+                $log->save();
+            } else {
+                $log = LifeStyleLog::create([
+                    'user_id' => $userId,
+                    'life_style_behavior_id' => $entry['life_style_behavior_id'],
+                    'value' => $entry['value'],
+                    'total_gdf15_effect' => $this->calculateGdf15Effect($behavior, $entry['value']),
+                    'logged_at' => $date,
+                ]);
+            }
+
+            $updatedLogs[] = $log;
+        }
+
+        return $updatedLogs;
+    }
+
     public function getLifeStyleScoreByPeriod($date, $type = 'day'): array
     {
         $date = Carbon::parse($date);
@@ -147,24 +182,26 @@ class LifeStyleService
     {
         $day = Carbon::parse($date)->toDateString();
 
-        $logs = $this->user->userLifeStyleLogs()
-                ->with('lifeStyle')
-                ->whereDate('logged_at',$day)
-                ->get();
+        $allLifeStyles = LifeStyleBehavior::all()->initializeEnumValues();
 
-        $logs = $logs->map(function ($log) {
+        $loggedActivities = $this->user->userLifeStyleLogs()
+            ->with('lifeStyle')
+            ->whereDate('logged_at', $day)
+            ->get()
+            ->keyBy('lifeStyle.id');
 
-            if (!$log->lifeStyle) return null;
+        $result = $allLifeStyles->map(function ($lifeStyle) use ($loggedActivities) {
+            $log = $loggedActivities->get($lifeStyle->id);
 
             return [
-                'name' => $log->lifeStyle->name,
-                'unit' => $log->lifeStyle->unit,
-                'value' => $log->value
+                'id' => $lifeStyle->id,
+                'name' => $lifeStyle->name,
+                'unit' => $lifeStyle->unit,
+                'value' => $log ? $log->value : null,
+                'enum_values' => $lifeStyle->enum_values
             ];
-        })->filter()->values();
-
-
-        return $logs;
+        })->values();
+        return $result;
     }
 
     public function getPhysicalActivityMinutes($userId, $date, $type)
