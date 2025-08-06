@@ -30,7 +30,7 @@ class LifeStyleController extends Controller
             'lifestylies.*.value' => 'required',
         ]);
 
-        $logs = $this->lifeStyleService->logLifeStyle($validated['lifestylies'],$validated['date']);
+        $logs = $this->lifeStyleService->logLifeStyle($validated['lifestylies']);
 
         return response()->data($logs, 'Lifestyle logged successfully.');
     }

@@ -6,6 +6,7 @@ use App\Models\LifeStyleBehavior;
 use App\Models\LifeStyleLog;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 
 class LifeStyleService
@@ -22,9 +23,10 @@ class LifeStyleService
         return LifeStyleBehavior::get()->initializeEnumValues();
     }
 
-    public function logLifeStyle(array $lifestylies,$date)
+    public function logLifeStyle(array $lifestylies)
     {
         $logs = [];
+        $date = Date::now()->toDateString();
 
         foreach ($lifestylies as $entry) {
             $behavior = LifeStyleBehavior::findOrFail($entry['life_style_behavior_id']);
