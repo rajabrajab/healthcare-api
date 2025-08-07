@@ -28,16 +28,14 @@ class Gdf15StatisticsController extends Controller
     public function byDate(Request $request)
     {
         $userId = Auth::id();
-        $date = $request->input('date', Carbon::today()->toDateString());
         $fromDate = $request->input('from_date');
         $endDate = $request->input('end_date');
-        $type = $request->input('type', 'day');
 
-        $foodStats = $this->foodService->getDietScoreByPeriod($date,$type);
-        $lifestyleStats = $this->lifeStyleService->getLifeStyleScoreByPeriod($date,$type);
+        $foodStats = $this->foodService->getDietScoreByPeriod($fromDate,$endDate);
+        $lifestyleStats = $this->lifeStyleService->getLifeStyleScoreByPeriod($fromDate,$endDate);
         $readingStats = $this->readingLogService->getReadingsByDate($fromDate,$endDate);
 
-        $physicalActivityMinutes = $this->lifeStyleService->getPhysicalActivityMinutes($userId, $date, $type);
+        $physicalActivityMinutes = $this->lifeStyleService->getPhysicalActivityMinutes($userId);
 
         $combinedStats = collect();
 

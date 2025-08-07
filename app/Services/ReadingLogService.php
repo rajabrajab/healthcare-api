@@ -30,6 +30,14 @@ class ReadingLogService
     {
     $userId = $this->user->id;
 
+     if (!$startDate && !$endDate) {
+        $startDate = Carbon::today()->startOfDay();
+        $endDate = Carbon::today()->endOfDay();
+    } else {
+        $startDate = Carbon::parse($startDate)->startOfDay();
+        $endDate = Carbon::parse($endDate)->endOfDay();
+    }
+
     $readings = ReadingLog::where('user_id', $userId)
         ->whereBetween('reading_date', [$startDate, $endDate])
         ->orderBy('reading_date', 'desc')

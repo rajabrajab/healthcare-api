@@ -87,11 +87,11 @@ class FoodController extends Controller
 
     public function getScoreStats(Request $request)
     {
-        $type = $request->query('type', 'day');
-        $date = $request->query('date', now()->toDateString());
+        $fromDate = $request->input('from_date');
+        $endDate = $request->input('end_date');
 
         return response()->data(
-            $this->foodService->getDietScoreByPeriod($date, $type)
+            $this->foodService->getDietScoreByPeriod($fromDate,$endDate)
         );
     }
 

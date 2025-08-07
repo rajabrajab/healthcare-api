@@ -156,44 +156,34 @@ class FoodService
         return FoodLogCategoryResource::collection($grouped);
     }
 
-    public function getDietScoreByPeriod($date, $type = 'day'): array
+    public function getDietScoreByPeriod($startDate = null, $endDate = null): array
     {
-        $date = Carbon::parse($date);
+        $endDate = $endDate ? Carbon::parse($endDate)->endOfDay() : Carbon::today()->endOfDay();
+        $startDate = $startDate ? Carbon::parse($startDate)->startOfDay() : $endDate->copy()->startOfDay();
 
-        switch ($type) {
-            case 'week':
-                $start = $date->copy()->startOfWeek()->startOfDay();
-                $end = $date->copy()->endOfWeek()->endOfDay();
-                $select = "DAYNAME(taken_at) as time";
-                $groupBy = "DAYNAME(taken_at)";
-                $orderBy = "DAYOFWEEK(taken_at)";
-                break;
+        $results = FoodLog::where('user_id', $this->user->id)
+            ->whereBetween('taken_at', [$startDate, $endDate])
+            ->selectRaw("
+                DATE(taken_at) as date,
+                SUM(total_gdf15_effect) as points
+            ")
+            ->groupBy('date')
+            ->orderByDesc('date')
+            ->take(6)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'date' => $item->date,
+                    'points' => (float) $item->points ?: 0
+                ];
+            })
+            ->toArray();
 
-            case 'month':
-                $start = $date->copy()->startOfMonth()->startOfDay();
-                $end = $date->copy()->endOfMonth()->endOfDay();
-                $select = "DAY(taken_at) as time";
-                $groupBy = "DAY(taken_at)";
-                $orderBy = "DAY(taken_at)";
-                break;
-
-            case 'day':
-            default:
-                $start = $date->copy()->startOfDay();
-                $end = $date->copy()->endOfDay();
-                $select = "DATE_FORMAT(taken_at, '%h:%i %p') as time";
-                $groupBy = "time";
-                $orderBy = "STR_TO_DATE(time, '%h:%i %p')";
-                break;
+        if (empty($results)) {
+            return [['date' => $endDate->format('Y-m-d'), 'points' => 0]];
         }
 
-        return FoodLog::where('user_id', $this->user->id)
-            ->whereBetween('taken_at', [$start, $end])
-            ->selectRaw("$select, SUM(total_gdf15_effect) as points")
-            ->groupByRaw($groupBy)
-            ->orderByRaw($orderBy)
-            ->get()
-            ->toArray();
+        return $results;
     }
     public function deleteFromUserDiet(int $foodId)
     {

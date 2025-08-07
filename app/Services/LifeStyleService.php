@@ -89,44 +89,71 @@ class LifeStyleService
         return $updatedLogs;
     }
 
-    public function getLifeStyleScoreByPeriod($date, $type = 'day'): array
+    public function getLifeStyleScoreByPeriod($startDate = null, $endDate = null)
     {
-        $date = Carbon::parse($date);
+        // $date = Carbon::parse($date);
 
-        switch ($type) {
-            case 'week':
-                $start = $date->copy()->startOfWeek()->startOfDay();
-                $end =  $date->copy()->endOfWeek()->endOfDay();
-                $select = "DAYNAME(logged_at) as time";
-                $groupBy = "DAYNAME(logged_at)";
-                $orderBy = "DAYOFWEEK(logged_at)";
-                break;
+        // switch ($type) {
+        //     case 'week':
+        //         $start = $date->copy()->startOfWeek()->startOfDay();
+        //         $end =  $date->copy()->endOfWeek()->endOfDay();
+        //         $select = "DAYNAME(logged_at) as time";
+        //         $groupBy = "DAYNAME(logged_at)";
+        //         $orderBy = "DAYOFWEEK(logged_at)";
+        //         break;
 
-            case 'month':
-                $start = $date->copy()->startOfMonth()->startOfDay();
-                $end = $date->copy()->endOfMonth()->endOfDay();
-                $select = "DAY(logged_at) as time";
-                $groupBy = "DAY(logged_at)";
-                $orderBy = "DAY(logged_at)";
-                break;
+        //     case 'month':
+        //         $start = $date->copy()->startOfMonth()->startOfDay();
+        //         $end = $date->copy()->endOfMonth()->endOfDay();
+        //         $select = "DAY(logged_at) as time";
+        //         $groupBy = "DAY(logged_at)";
+        //         $orderBy = "DAY(logged_at)";
+        //         break;
 
-            case 'day':
-            default:
-                $start = $date->copy()->startOfDay();
-                $end = $date->copy()->endOfDay();
-                $select = "DATE_FORMAT(logged_at, '%h:%i %p') as time";
-                $groupBy = "time";
-                $orderBy = "STR_TO_DATE(time, '%h:%i %p')";
-                break;
+        //     case 'day':
+        //     default:
+        //         $start = $date->copy()->startOfDay();
+        //         $end = $date->copy()->endOfDay();
+        //         $select = "DATE_FORMAT(logged_at, '%h:%i %p') as time";
+        //         $groupBy = "time";
+        //         $orderBy = "STR_TO_DATE(time, '%h:%i %p')";
+        //         break;
+        // }
+
+        // return LifeStyleLog::where('user_id', $this->user->id)
+        //     ->whereBetween('logged_at', [$start, $end])
+        //     ->selectRaw("$select, SUM(total_gdf15_effect) as points")
+        //     ->groupByRaw($groupBy)
+        //     ->orderByRaw($orderBy)
+        //     ->get()
+        //     ->toArray();
+
+        $endDate = $endDate ? Carbon::parse($endDate)->endOfDay() : Carbon::today()->endOfDay();
+        $startDate = $startDate ? Carbon::parse($startDate)->startOfDay() : $endDate->copy()->startOfDay();
+
+        $results = LifeStyleLog::where('user_id', $this->user->id)
+            ->whereBetween('logged_at', [$startDate, $endDate])
+            ->selectRaw("
+                DATE(logged_at) as date,
+                SUM(total_gdf15_effect) as points
+            ")
+            ->groupBy('date')
+            ->orderByDesc('date')
+            ->take(6)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'date' => $item->date,
+                    'points' => (float) $item->points ?: 0
+                ];
+            })
+            ->toArray();
+
+        if (empty($results)) {
+            return [['date' => $endDate->format('Y-m-d'), 'points' => 0]];
         }
 
-        return LifeStyleLog::where('user_id', $this->user->id)
-            ->whereBetween('logged_at', [$start, $end])
-            ->selectRaw("$select, SUM(total_gdf15_effect) as points")
-            ->groupByRaw($groupBy)
-            ->orderByRaw($orderBy)
-            ->get()
-            ->toArray();
+        return $results;
     }
 
     protected function calculateGdf15Effect($behavior, $value): int
@@ -206,30 +233,14 @@ class LifeStyleService
         return $result;
     }
 
-    public function getPhysicalActivityMinutes($userId, $date, $type)
+    public function getPhysicalActivityMinutes($userId)
     {
-        $date = Carbon::parse($date);
+        $todayStart = Carbon::today()->startOfDay();
+        $todayEnd = Carbon::today()->endOfDay();
 
-        switch ($type) {
-            case 'week':
-                $start = $date->copy()->startOfWeek();
-                $end = $date->copy()->endOfWeek();
-                break;
-            case 'month':
-                $start = $date->copy()->startOfMonth();
-                $end = $date->copy()->endOfMonth();
-                break;
-            default:
-                $start = $date->copy()->startOfDay();
-                $end = $date->copy()->endOfDay();
-                break;
-        }
-
-        $activityMinutes = LifestyleLog::where('user_id', $userId)
+        return (int) LifestyleLog::where('user_id', $userId)
             ->where('life_style_behavior_id', 2)
-            ->whereBetween('created_at', [$start, $end])
+            ->whereBetween('created_at', [$todayStart, $todayEnd])
             ->sum('value');
-
-        return (int) $activityMinutes;
     }
 }
